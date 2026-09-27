@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Anuitas</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1a365d;
+        }
+        .identitas-card {
+            background: #ffffff;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            color: #4a5568;
+            border-left: 5px solid #3182ce;
+        }
+        .identitas-card p {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .identitas-card ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .identitas-card li {
+            padding: 4px 0;
+        }
+        .identitas-card li::before {
+            content: "• ";
+            color: #3182ce;
+            font-weight: bold;
+            display: inline-block; 
+            width: 1em;
+        }
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2b6cb0;
+        }
+        .hidden {
+            display: none;
+        }
+        h2 {
+            text-align: center;
+            color: #2f855a;
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th:first-child, td:first-child {
+            text-align: center;
+        }
+        th {
+            background-color: #3182ce;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        tr:hover {
+            background-color: #edf2f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kalkulator Anuitas</h1>
+        
+        <div class="identitas-card">
+            <p><strong>Kelompok:</strong> 1 (Ganti nomor di sini)</p>
+            <p><strong>Anggota:</strong></p>
+            <ul>
+                <li>Nama Anggota 1</li>
+                <li>Nama Anggota 2</li>
+                <li>Nama Anggota 3</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <label>Jumlah Pinjaman / Modal (Rp)</label>
+                <input type="number" id="pinjaman" placeholder="Contoh: 10000000">
+            </div>
+            <div class="input-group">
+                <label>Suku Bunga per Bulan (%)</label>
+                <input type="number" id="bunga" placeholder="Contoh: 2">
+            </div>
+            <div class="input-group">
+                <label>Jangka Waktu / Tenor (Bulan)</label>
+                <input type="number" id="tenor" placeholder="Contoh: 12">
+            </div>
+            <button onclick="hitungAnuitas()">Hitung Anuitas</button>
+        </div>
+
+        <div id="result-section" class="hidden">
+            <h2>Anuitas per Bulan: <span id="hasil-anuitas"></span></h2>
+            <div class="table-responsive">
+                <table id="tabel-angsuran">
+                    <thead>
+                        <tr>
+                            <th>Bulan ke-</th>
+                            <th>Sisa Pinjaman Awal</th>
+                            <th>Bunga</th>
+                            <th>Angsuran Pokok</th>
+                            <th>Sisa Pinjaman Akhir</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function hitungAnuitas() {
+            const pinjaman = parseFloat(document.getElementById('pinjaman').value);
+            const bungaPersen = parseFloat(document.getElementById('bunga').value);
+            const tenor = parseInt(document.getElementById('tenor').value);
+
+            if (isNaN(pinjaman) || isNaN(bungaPersen) || isNaN(tenor) || pinjaman <= 0 || bungaPersen <= 0 || tenor <= 0) {
+                alert("Harap masukkan angka yang valid dan lebih dari 0");
+                return;
+            }
+
+            const i = bungaPersen / 100;
+            const anuitas = (pinjaman * i) / (1 - Math.pow(1 + i, -tenor));
+
+            document.getElementById('hasil-anuitas').innerText = formatRupiah(anuitas);
+            document.getElementById('result-section').classList.remove('hidden');
+
+            const tbody = document.querySelector('#tabel-angsuran tbody');
+            tbody.innerHTML = '';
+
+            let sisaPinjaman = pinjaman;
+
+            for (let bulan = 1; bulan <= tenor; bulan++) {
+                const bungaBulanIni = sisaPinjaman * i;
+                const pokokBulanIni = anuitas - bungaBulanIni;
+                let sisaAkhir = sisaPinjaman - pokokBulanIni;
+
+                if (Math.abs(sisaAkhir) < 1) {
+                    sisaAkhir = 0;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${bulan}</td>
+                    <td>${formatRupiah(sisaPinjaman)}</td>
+                    <td>${formatRupiah(bungaBulanIni)}</td>
+                    <td>${formatRupiah(pokokBulanIni)}</td>
+                    <td>${formatRupiah(sisaAkhir)}</td>
+                `;
+                tbody.appendChild(tr);
+
+                sisaPinjaman = sisaAkhir;
+            }
+        }
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { 
+                style: 'currency', 
+                currency: 'IDR' 
+            }).format(angka);
+        }
+    </script>
+</body>
+</html>
